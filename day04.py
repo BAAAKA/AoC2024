@@ -28,14 +28,12 @@ def get_x_mas(pos=(0,0)):
     return 1
 
 totalCount = 0
+totalCount2 = 0
 for r in range(0,len(lines)):
     for c in range(0,len(lines[0])+1):
         totalCount += get_xmas(pos=(r,c))
-print(f'Part 1: {totalCount}')
+        totalCount2 += get_x_mas(pos=(r,c))
 
-totalCount = 0
-for r in range(0,len(lines)):
-    for c in range(0,len(lines[0])+1):
-        totalCount += get_x_mas(pos=(r,c))
-print(f'Part 2: {totalCount}')
+print(f'Part 1: {totalCount}')
+print(f'Part 2: {totalCount2}')
 
