@@ -19,9 +19,7 @@ def calculate(nrs, current_value, step, test_val, enabled_pipe_operation = False
 
     operations = [
         current_value + next_val,
-        # current_value - next_val,
         current_value * next_val,
-        # current_value / next_val,
     ]
     if enabled_pipe_operation:# Enable for Part 2
         operations.append(
