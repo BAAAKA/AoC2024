@@ -4,7 +4,7 @@ import numpy as np
 line = np.array(list(map(int, (read_file('data/day09.txt')[0]))))
 print(line)
 
-empty_pos = np.cumsum(line)[:-1:2]
+empty_pos = np.cumsum(line)[:-1:2] # ?
 empty_len = line[1::2]
 empties = np.vstack((empty_pos, empty_len)).T
 print(empties)
@@ -22,7 +22,7 @@ for i, value in enumerate(reversed(line)):
     index = len(line) - i - 1 # The index forward
     is_file = (index+1)%2
     # print(f'{index} file len:{value} | is_file: {is_file} | position: {position}')
-    empties = empties[empties[:, 0] <= position]
+    empties = empties[empties[:, 0] < position]
 
     if not is_file:
         position-=value
@@ -54,11 +54,4 @@ for i, value in enumerate(reversed(line)):
 
 print(f'Total: {total}')
 
-
-
-
-
-
-
-
-# 6421724664967 That's not the right answer; your answer is too high. If you're stuck, make sure you're using the full input data;
+# 6421724645083
