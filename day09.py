@@ -5,8 +5,6 @@ line = np.array(list(map(int, (read_file('data/day09.txt')[0]))))
 
 print(line)
 
-
-
 def gen_yield_from_behind(line):
     for index in range(0, len(line)):
         reversed_index = len(line)-index-1
