@@ -1,8 +1,21 @@
 import numpy as np
 
-print(len('00...111...2...333.44.5555.6666.777.888899'))
-print(len('00...111...2...333.44.5555.6666.777.8888'))
-print(len('00...111...2...333.44.5555.6666.777'))
-print(len('00...111...2...333.44.5555.6666'))
 
-print(len('123'))
+next_positions = [(1, np.array([2, 1])), (1, np.array([4, 3])), (1, np.array([4, 3])), (2, np.array([2, 1]))]
+
+
+def summarize(next_positions):
+    pos_dict = {}
+    for val, pos in next_positions:
+        pos_dict[tuple(pos)] = pos_dict.get(tuple(pos), 0)+val
+
+    return [(value, np.array(key)) for key, value in pos_dict.items()]
+    
+    
+
+
+
+result=summarize(next_positions)
+print(result)
+
+
