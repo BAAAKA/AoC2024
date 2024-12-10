@@ -3,40 +3,63 @@ import numpy as np
 
 line = np.array(list(map(int, (read_file('data/day09.txt')[0]))))
 
+print(line)
 
-files = line[::2]
-empty = line[1::2]
-id_numbers = np.array(list(range(len(files))))
 
-print(id_numbers)
-print(files)
-print(empty)
-fline = np.array([])
-for i in range(len(line)):
-    is_file = (i+1)%2
-    block = i//2
-    if is_file:
-        fline = np.append(fline, [str(block)]*line[i], axis=None)
+
+def gen_yield_from_behind(line):
+    for index in range(0, len(line)):
+        reversed_index = len(line)-index-1
+        is_file = (reversed_index+1)%2
+
+        block_id = reversed_index//2
+        if is_file: 
+            for i in range(line[reversed_index]):
+                yield block_id, reversed_index
+
+position = 0 # Position on the opened numberline
+checksum_total = 0 
+fileID = 0 # ID number based on the order of the files as they appear before reordering
+index_forward = 0 # The index on the variable compressed line
+index_backwards = len(line)-1
+file_switch = True
+
+
+generator_behind = gen_yield_from_behind(line=line)
+
+while index_forward<index_backwards:
+    # print(f'FileID {index_forward//2}, its a file: {file_switch}, position: {position}')
+    # print(f'current value is {checksum_total}')
+    if file_switch:
+        file_length = line[index_forward]
+        fileID = index_forward//2
+
+        file_checksum = sum(range(position, position+file_length))*fileID # File checksum for the next file
+        checksum_total += file_checksum
+
+        print(f'{file_length} {file_checksum} | {checksum_total}')
+        position += file_length
+        index_forward += 1
     else:
-        fline = np.append(fline, ['.']*line[i], axis=None)
+        empty_length = line[index_forward]
+        #print(f'> empty_length: {empty_length}')
+        for i in range(empty_length):
+            fileID, index_backwards = next(generator_behind)
+            # print(f'> file from behind: {fileID}, calc: {position}*{fileID}')
+            checksum_total += position*fileID
+            position+=1
+        index_forward += 1
+    file_switch = file_switch == False
 
-# def index_last_nondot(fline):
-#     for i in range(len(fline)):
-#         if fline[::-1][i] != '.':
-#             return len(fline)-i-1
+for i in range(10):
+    fileID_runout, index_backwards_runout = next(generator_behind)
+    if index_backwards_runout != index_backwards:
+        break
+    checksum_total += position*fileID
+    position+=1
 
-# def get_value(fline):
-#     return sum((int(v)*i for i, v in enumerate(fline) if v != '.'))
 
-# for i in range(20000000):
 
-#     if fline[i] == '.':
-#         last_index = index_last_nondot(fline)
-#         fline[i] = fline[last_index]
-#         fline[last_index] = '.'
+print(f'P1: {checksum_total}')
 
-#     if len(set(fline[i+1:]))==1:
-#         print('break')
-#         break
 
-# print(f'P1: {get_value(fline)}')
