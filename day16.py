@@ -99,10 +99,7 @@ def rec_fill(p):
 
 score, pos, d, p = current_node
 rec_fill(p)
-    
 
-
-# #  (11042, (7, 15), '^'): (10042, (7, 15), '^'), 
 print(maze)   
 print(f'P1: {score}')   
 total_seats = np.count_nonzero(maze=='O')+1
