@@ -8,10 +8,6 @@ nr_to_register = {
     6: 'C',
 }
 
-
-
-
-
 def get_combo_value(value, register):
     if value <= 3:
         return value
