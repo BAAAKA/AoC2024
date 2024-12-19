@@ -7,38 +7,40 @@ split_idx = lines.index('')
 towels = lines[:split_idx][0].split(', ')
 patterns = lines[1+split_idx:]
 
-print(towels)
-print(patterns)
-
-def get_valid_towerls(pattern):
-    return [towel for towel in towels if pattern[:len(towel)] == towel]
+# print(towels)
+# print(patterns)
+len_longest_pattern = len(max(patterns, key=len))
 
 
-def search_combinations(pattern):
-    print(f'pattern: {pattern}')
-    if len(pattern) == 0:
-        print('Reached the end!')
-        return []
-    
-    valid_towels = get_valid_towerls(pattern)
-    print(f'Valid Towels: {valid_towels}')
-    if len(valid_towels) == 0:
-        print('There were no valid combinations')
-        return None
+def get_valid_towels_from_behind(pattern):
+    return [(pattern[:-len(towel)], towel) for towel in towels if pattern[-len(towel):] == towel]
 
-    for valid_towel in valid_towels:
-        towel_len = len(valid_towel)
-        result = search_combinations(pattern[towel_len:])
-        if isinstance(result, list):
-            result.append(valid_towel)
-            return result
+def get_combinations(pattern):
+    towel_dict = {}
+
+    for i in range(len(pattern)):
+        sub_pattern = pattern[:i+1]
+
+        valid_towels = get_valid_towels_from_behind(sub_pattern)
+        for req_pat, towel in get_valid_towels_from_behind(sub_pattern):
+            if req_pat == '':
+                towel_dict[sub_pattern] = towel_dict.get(sub_pattern, 0) + 1
+            elif req_pat in towel_dict:
+                towel_dict[sub_pattern] = towel_dict.get(sub_pattern, 0) + towel_dict[req_pat]
+
+        # print(f'{sub_pattern}: {towel_dict} { valid_towels}')
+    return towel_dict.get(pattern, 0)
 
 results = []
 for pattern in patterns:
-    result = search_combinations(pattern=pattern)
-    if result:
-        results.append(','.join(result[::-1]))
-        
-print(results)
-print(f'P1: {len(results)}')  
+    # print(f'pattern: {pattern}')
+    result = get_combinations(pattern)
+    results.append(result)
+
+print(f'P1: {np.sum(np.array(results) > 0)}')
+print(f'P2: {sum(results)}')
+
+
+
+
 
