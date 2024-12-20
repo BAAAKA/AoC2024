@@ -11,13 +11,12 @@ patterns = lines[1+split_idx:]
 # print(patterns)
 len_longest_pattern = len(max(patterns, key=len))
 
-
 def get_valid_towels_from_behind(pattern):
     return [(pattern[:-len(towel)], towel) for towel in towels if pattern[-len(towel):] == towel]
 
 def get_combinations(pattern):
     towel_dict = {}
-
+    
     for i in range(len(pattern)):
         sub_pattern = pattern[:i+1]
 
