@@ -1,21 +1,16 @@
-import numpy as np
+def array_to_binary(_v_dict, array_keys):
+    binary_result = ''.join([str(_v_dict[key]) for key in sorted(array_keys)])
+    return binary_result
+
+v1 = 10
+binary_v1 = str(bin(v1)[2:])
+print(f':{binary_v1}')
+manual_v_dict = {}
+for i in range(len(binary_v1)):
+    manual_v_dict['x'+f'{i}'.zfill(2)] = binary_v1[i]
+
+x_wires = array_to_binary(manual_v_dict, [key for key in manual_v_dict if key[0] == 'x'])
+y_wires = array_to_binary(manual_v_dict, [key for key in manual_v_dict if key[0] == 'y'])
 
 
-next_positions = [(1, np.array([2, 1])), (1, np.array([4, 3])), (1, np.array([4, 3])), (2, np.array([2, 1]))]
-
-
-def summarize(next_positions):
-    pos_dict = {}
-    for val, pos in next_positions:
-        pos_dict[tuple(pos)] = pos_dict.get(tuple(pos), 0)+val
-
-    return [(value, np.array(key)) for key, value in pos_dict.items()]
-    
-    
-
-
-
-result=summarize(next_positions)
-print(result)
-
-
+print('x: '+f'{int(x_wires, 2)}'.zfill(2)+f' | {x_wires}')

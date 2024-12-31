@@ -11,14 +11,16 @@ v_dict = {k[:-1]:int(v) for k, v in (line.split(' ') for line in lines[:empty_in
 
 
 def get_result(_v_dict, k1, k2, operation):
+    val_k1 = int(_v_dict[k1])
+    val_k2 = int(_v_dict[k2])
     if operation == 'AND':
-        if _v_dict[k1] == _v_dict[k2] == 1:
+        if val_k1 == val_k2 == 1:
             return 1
     elif operation == 'OR':
-        if _v_dict[k1] == 1 or _v_dict[k2] == 1:
+        if val_k1 == 1 or val_k2 == 1:
             return 1
     elif operation == 'XOR':
-        if _v_dict[k1] != _v_dict[k2]:
+        if val_k1 != val_k2:
             return 1
     return 0
 
@@ -32,12 +34,14 @@ def perform_operations(_v_dict, _operations):
         for i, (k1, k2, operation, result_key) in enumerate(_operations):
             if k1 in _v_dict and k2 in _v_dict:
                 _v_dict[result_key] = get_result(_v_dict, k1, k2, operation)
+                print(f'setting {result_key} as {_v_dict[result_key]} as {k1} ({_v_dict[k1]}) {k2} ({_v_dict[k2]}) {operation}')
                 _operations.pop(i)
                 change_occured = True
                 break
         if not change_occured:
             # print(_operations)
             # print("Infinite Loop")
+            return _v_dict
             return False
 
     return _v_dict
@@ -47,22 +51,30 @@ def adjust_operations(operations, gene):
     for i1, i2 in gene:
         new_operations[i1][3], new_operations[i2][3] = new_operations[i2][3], new_operations[i1][3]
     return new_operations
-    
+
+def get_wrong_z_values(binary_result, z_wires):
+    incorrect_z_values = []
+    str_result = str(binary_result)
+    str_z_wire = str(z_wires).ljust(len(str_result),'0')
+    for i in range(len(str_result)):
+        idx = len(str_result)-i-1
+        if str_result[i] != str_z_wire[i]:
+            incorrect_z_values.append('z'+f'{idx}'.zfill(2))
+    return incorrect_z_values
+
 
 def get_loss(v1, v2, _operations):
     expected_result = v1 + v2
-    binary_v1 = str(bin(v1)[2:])
-    binary_v2 = str(bin(v2)[2:])
+    print(f'{v1}+{v2}={expected_result}')
     binary_result = str(bin(expected_result)[2:])
-
-
-    if not (len(binary_v1) == len(binary_v2)):
-        raise Exception('Length is not the same')
+    min_length = len(binary_result)
+    binary_v1 = str(bin(v1)[2:]).zfill(min_length)
+    binary_v2 = str(bin(v2)[2:]).zfill(min_length)
 
     manual_v_dict = {}
-    for i in range(len(binary_v1)):
-        manual_v_dict['x'+f'{i}'.zfill(2)] = binary_v1[i]
-        manual_v_dict['y'+f'{i}'.zfill(2)] = binary_v2[i]
+    manual_v_dict.update({'x'+f'{i}'.zfill(2):digit for i, digit in enumerate(binary_v1[::-1])})
+    manual_v_dict.update({'y'+f'{i}'.zfill(2):digit for i, digit in enumerate(binary_v2[::-1])})
+
 
     x_wires = array_to_binary(manual_v_dict, [key for key in manual_v_dict if key[0] == 'x'])
     y_wires = array_to_binary(manual_v_dict, [key for key in manual_v_dict if key[0] == 'y'])
@@ -74,11 +86,20 @@ def get_loss(v1, v2, _operations):
         # raise Exception('Infinite Loop')
     z_wires = array_to_binary(res_dict, [key for key in res_dict if key[0] == 'z'])
 
+    int_nr_len = len(str(int(binary_result, 2)))
+    bin_nr_len = len(str(binary_result))
+    print('x:'+f'{int(x_wires, 2)}'.zfill(int_nr_len)+' | '+f'{x_wires}'.zfill(bin_nr_len))
+    print('y:'+f'{int(y_wires, 2)}'.zfill(int_nr_len)+' | '+f'{y_wires}'.zfill(bin_nr_len))
+    print('e:'+f'{int(binary_result, 2)}'+f' | {binary_result}')
+    print('z:'+f'{int(z_wires, 2)}'.zfill(int_nr_len)+f' | '+f'{z_wires}'.zfill(bin_nr_len))
 
-    # print('x: '+f'{int(x_wires, 2)}'.zfill(2)+f' | {x_wires}')
-    # print('y: '+f'{int(y_wires, 2)}'.zfill(2)+f' | {y_wires}')
-    # print('z: '+f'{int(z_wires, 2)}'.zfill(2)+f' | {z_wires}')
-    # print('e:'+f'{int(binary_result, 2)}'.zfill(2)+f' | {binary_result}')
+
+    print(f'Incorrect z values: {get_wrong_z_values(binary_result, z_wires)}')
+
+    if int(x_wires, 2) != v1:
+        raise Exception(f'x values {int(x_wires, 2)} {v1} are different')
+    if int(y_wires, 2) != v2:
+        raise Exception(f'y values {int(y_wires, 2)} {v2} are different')
 
     loss = bin(int(binary_result, 2) ^ int(z_wires, 2)).count('1')
     # print(f'loss: {loss}')
@@ -119,41 +140,42 @@ max_value = 2**45
 numbers = [(random.randint(min_value, max_value - 1), random.randint(min_value, max_value - 1)) for i in range(4)]
 
 
-total_population = 50
-chosen_population = 20
-chosen_parents = 10
-new_children = 20
-population = [get_random_gene() for i in range(total_population)]
+# total_population = 50
+# chosen_population = 20
+# chosen_parents = 10
+# new_children = 20
+# population = [get_random_gene() for i in range(total_population)]
 
-for generation in range(1000):
-    next_gen = []
-    for gene in population:
-        adjusted_operations = adjust_operations(operations=operations, gene=gene)
+# for generation in range(1000):
+#     next_gen = []
+#     for gene in population:
+#         adjusted_operations = adjust_operations(operations=operations, gene=gene)
 
-        total_loss = 0
-        for v1, v2 in numbers:
-            loss = get_loss(v1, v2, adjusted_operations)
-            total_loss += loss
-        next_gen.append((total_loss, gene))
-    next_gen = sorted(next_gen, key=lambda x: x[0])
-    best_loss = next_gen[0][0]
-    # print(f'next_gen: {next_gen[:chosen_population]}')
-    selected_population = [next_gen[i][1] for i in range(chosen_population)]
-    for i in range(new_children):
-        gene1, gene2 = random.sample(selected_population[chosen_parents:], 2)
-        combined_gene = combine_genes(gene1, gene2)
-        # print(f'{gene1} {gene2} = {combined_gene}')
-        selected_population.append(combined_gene)
+#         total_loss = 0
+#         for v1, v2 in numbers:
+#             loss = get_loss(v1, v2, adjusted_operations)
+#             total_loss += loss
+#         next_gen.append((total_loss, gene))
+#     next_gen = sorted(next_gen, key=lambda x: x[0])
+#     best_loss = next_gen[0][0]
+#     # print(f'next_gen: {next_gen[:chosen_population]}')
+#     selected_population = [next_gen[i][1] for i in range(chosen_population)]
+#     for i in range(new_children):
+#         gene1, gene2 = random.sample(selected_population[chosen_parents:], 2)
+#         combined_gene = combine_genes(gene1, gene2)
+#         # print(f'{gene1} {gene2} = {combined_gene}')
+#         selected_population.append(combined_gene)
 
-    population = [get_random_gene() for i in range(total_population-len(selected_population))] + selected_population
-    sorted_population = [tuple(sorted(tup)) for tup in population]
-    population = set(sorted_population)
-    print(f'GENERATION {generation} best_loss: {best_loss} | {next_gen[0][1]}')
-
-
+#     population = [get_random_gene() for i in range(total_population-len(selected_population))] + selected_population
+#     sorted_population = [tuple(sorted(tup)) for tup in population]
+#     population = set(sorted_population)
+#     print(f'GENERATION {generation} best_loss: {best_loss} | {next_gen[0][1]}')
 
 
-
+v1, v2 = numbers[1]
+# v1, v2 = 12,13
+loss = get_loss(v1, v2, operations)
+print(loss)
 
 
 
