@@ -126,28 +126,38 @@ def get_next_seq(sequence, depth):
         return memory[(depth, sequence)]
         # print(f'YES')
         pass
-    all_shortest_parts = []
+    # all_shortest_parts = []
+    total_minimum_value = 0
     if depth == 0:
-        return sequence
+        return len(sequence)
     # print(f'sequence: {sequence}')
     next_parts = path_to_next_path(sequence)
     # print(f'next_parts: {next_parts}')
     for part in next_parts:
         sequences = [get_next_seq(next_sequence, depth-1) for next_sequence in part]
-        shortest_str = min(sequences, key=len)
+        min_value = min(sequences)
+        # print(f'for {sequence}: {min_value}')
+        total_minimum_value += min_value
         # print(f'shortest_str: {shortest_str}')
-        all_shortest_parts.append(''.join(shortest_str))
+        # all_shortest_parts.append(''.join(shortest_str))
         # print(f'part: {part} | {shortest_str}')
     # print(f'all_shortest_parts 1d: {all_shortest_parts}')
     # joined_shortest_path = ''.join(all_shortest_parts)
-    memory[depth, sequence] = joined_shortest_path
-    return joined_shortest_path
+    memory[depth, sequence] = total_minimum_value
+    return total_minimum_value
 
 
 
 starting_position = 'A'
 sequence = '980A'
 
-best_str = get_next_seq(sequence, 1+2)
-best_str = ''.join(best_str)
-print(f'{len(best_str)}')
+total_value = 0
+
+for code in target_codes:
+    number = int(''.join(char for char in code if char.isdigit()))
+    value = get_next_seq(code, 1+25)
+    print(f'resuilt value: {value} = {number*value}')
+
+    total_value += number*value
+
+print(f'Total {total_value}')
